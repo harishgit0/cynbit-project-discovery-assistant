@@ -6,20 +6,59 @@ An independent website-improvement prototype for a guided project inquiry. It is
 
 The five-step Vue workflow, dynamic requirement choices, editable review, deterministic brief preview, FastAPI validation, idempotent inquiry endpoint, and PostgreSQL persistence are implemented. The frontend production build and local inquiry submission have been verified. The app is deployed publicly on Render and connected to Neon.
 
+## Problem and solution
+
+Cynbit's public Contact page collects contact details, company, industry, and a free-text message. The independent prototype adds a guided way for prospective clients to describe project scope, required functionality, budget, and timeline before submitting an inquiry. It complements the existing contact experience and does not modify Cynbit's production site.
+
+## Key features
+
+- Five-step inquiry flow with step validation, back navigation, and editable review.
+- Six project categories with category-specific requirement options.
+- Deterministic project brief preview; no external LLM dependency.
+- FastAPI validation and PostgreSQL persistence with idempotency-key duplicate protection.
+- Loading, API status, submission error, and success states.
+
 ## Live demo
 
 - Frontend: <https://cynbit-project-discovery-assistant-hz5m.onrender.com>
 - API health: <https://cynbit-project-discovery-assistant.onrender.com/api/health>
+
+## Screenshots
+
+Captured from the deployed app with synthetic example details.
+
+![Desktop contact step](docs/screenshots/desktop-contact.png)
+
+![Mobile contact step](docs/screenshots/mobile-contact.png)
+
+![Desktop project brief review](docs/screenshots/desktop-review.png)
 
 ## Repository layout
 
 ```text
 frontend/            Vue 3 + Vite application
 backend/app/         FastAPI application
+backend/tests/       Backend validation and persistence tests
+docs/                Technical report and deployed UI screenshots
 backend/requirements.txt
+backend/requirements-dev.txt
 ```
 
 The API uses PostgreSQL with structured inquiry columns and a JSONB requirements list. Its table is created on the first successful submission. Repeating a request with the same `Idempotency-Key` returns the original saved inquiry.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Visitor[Visitor browser] --> UI[Vue 3 + Vite frontend on Render]
+    UI -->|HTTPS REST| API[FastAPI on Render]
+    API --> Validate[Pydantic validation and brief generation]
+    Validate --> DB[(Neon PostgreSQL)]
+    DB --> API
+    API --> UI
+```
+
+The inquiry table stores contact and project fields, a generated brief, a unique idempotency key, and a timestamp. Requirements are stored as JSONB. The table is created on the first successful submission; database migrations are not configured.
 
 ## API
 
@@ -60,6 +99,18 @@ npm run dev
 
 The frontend uses `http://localhost:8000` by default. To change it, create `frontend/.env.local` with `VITE_API_BASE_URL` set to the API base URL.
 
+### Backend checks
+
+From the repository root, install development dependencies and run the automated backend tests:
+
+```powershell
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+The test suite covers Pydantic validation, category-specific requirements, deterministic brief content, database URL handling, and idempotent save behavior using a mocked connection. The current result is **11 passed**.
+
 ## Environment variables
 
 Backend deployment placeholders are listed in `.env.example`; frontend configuration is in `frontend/.env.example`. Keep real credentials in local environment variables or the hosting provider's secret settings. Do not commit `.env` files.
@@ -82,4 +133,12 @@ The API is configured in the Ohio region to stay near the Neon database's US Eas
 
 ## Verification status
 
-Verified: frontend production build; five-step wizard validation, category changes, back navigation, and review editing; local inquiry submission; public frontend HTTP response; public API health; CORS preflight from the deployed frontend; and idempotent API submission backed by a confirmed PostgreSQL row. Automated backend tests and a full form submission through the public browser remain to be checked.
+Verified: frontend production build; five-step wizard validation, category changes, back navigation, and review editing; local inquiry submission; public five-step browser submission and success screen; public API health; CORS preflight from the deployed frontend; idempotent API submission backed by a confirmed PostgreSQL row; and 11 passing backend tests.
+
+The [technical report](docs/technical-report.md) documents the problem, design, architecture, data model, verification, deployment, and limitations.
+
+## Known limitations
+
+- The free Render API instance spins down when idle, so its first request afterward can be delayed.
+- There is no authentication or administrative inquiry dashboard.
+- There is no migration framework or usability-study data. Business impact has not been measured.
