@@ -1,8 +1,17 @@
 import os
+import logging
+from uuid import UUID
 
-from fastapi import FastAPI
+import psycopg
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.schemas.inquiry import InquiryCreate, InquiryCreated
+from app.services.briefs import generate_project_brief
+from app.services.inquiries import save_inquiry
+
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Cynbit Project Discovery API",
@@ -28,3 +37,19 @@ app.add_middleware(
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok", "service": "cynbit-discovery-api"}
+
+
+@app.post("/api/inquiries", response_model=InquiryCreated, status_code=201)
+def create_inquiry(
+    inquiry: InquiryCreate,
+    idempotency_key: UUID = Header(alias="Idempotency-Key"),
+) -> InquiryCreated:
+    project_brief = generate_project_brief(inquiry)
+    try:
+        return save_inquiry(inquiry, idempotency_key, project_brief)
+    except (RuntimeError, psycopg.Error) as error:
+        logger.exception("Could not persist project inquiry")
+        raise HTTPException(
+            status_code=503,
+            detail="Inquiry storage is not available right now. Your details have not been submitted; please try again shortly.",
+        ) from error

@@ -4,7 +4,7 @@ An independent website-improvement prototype for a guided project inquiry. It is
 
 ## Current progress
 
-The repository currently contains the Vue/Vite frontend shell and a minimal FastAPI health endpoint. The five-step inquiry workflow, database integration, deployment, and technical assessment report remain to be implemented and verified.
+The five-step Vue workflow, dynamic requirement choices, editable review, deterministic brief preview, FastAPI validation, idempotent inquiry endpoint, and PostgreSQL persistence code are implemented. The local API, database connection, automated tests, deployment, and complete public submission flow still need to be run and verified.
 
 ## Repository layout
 
@@ -13,6 +13,15 @@ frontend/            Vue 3 + Vite application
 backend/app/         FastAPI application
 backend/requirements.txt
 ```
+
+The API uses PostgreSQL with structured inquiry columns and a JSONB requirements list. Its table is created on the first successful submission. Repeating a request with the same `Idempotency-Key` returns the original saved inquiry.
+
+## API
+
+- `GET /api/health` — API liveness check.
+- `POST /api/inquiries` — validates an inquiry, generates a rule-based brief, and stores it in PostgreSQL.
+
+The submit endpoint requires an `Idempotency-Key` UUID header. The frontend creates and reuses this key for retries in the current browser session.
 
 ## Local setup
 
@@ -30,7 +39,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-The API health endpoint is `http://127.0.0.1:8000/api/health`.
+The API health endpoint is `http://127.0.0.1:8000/api/health`. Set `DATABASE_URL` in the backend process environment to enable inquiry submissions. The connection string should use SSL when required by the PostgreSQL host.
 
 ### Frontend
 
@@ -46,8 +55,8 @@ The frontend uses `http://localhost:8000` by default. To change it, create `fron
 
 ## Environment variables
 
-Backend deployment placeholders are listed in `.env.example`. Keep real credentials in local environment variables or the hosting provider's secret settings. Do not commit `.env` files.
+Backend deployment placeholders are listed in `.env.example`; frontend configuration is in `frontend/.env.example`. Keep real credentials in local environment variables or the hosting provider's secret settings. Do not commit `.env` files.
 
 ## Verification status
 
-The application has not yet been run end to end from this fresh checkout. Treat setup as verified only after starting both servers and seeing the frontend report that the API is connected.
+The application has not yet been run end to end from this fresh checkout. Treat setup as verified only after starting both servers, connecting a PostgreSQL database, and completing a public or local inquiry submission. Automated backend tests and deployment verification are pending.

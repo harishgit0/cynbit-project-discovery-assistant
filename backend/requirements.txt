@@ -1,2 +1,5 @@
 fastapi
 uvicorn[standard]
+pydantic>=2.10
+email-validator
+psycopg[binary]
