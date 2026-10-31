@@ -14,7 +14,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGINS
-        value: https://cynbit-project-discovery-assistant-harisgit0.onrender.com
+        value: https://cynbit-project-discovery-assistant-hz5m.onrender.com
 
   - type: web
     name: cynbit-project-discovery-assistant-harisgit0
@@ -23,4 +23,4 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://cynbit-project-discovery-assistant-harisgit0-api.onrender.com
+        value: https://cynbit-project-discovery-assistant.onrender.com
