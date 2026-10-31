@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cynbit-project-discovery-assistant-harisgit0-api
+    runtime: python
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.7
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://cynbit-project-discovery-assistant-harisgit0.onrender.com
+
+  - type: web
+    name: cynbit-project-discovery-assistant-harisgit0
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://cynbit-project-discovery-assistant-harisgit0-api.onrender.com
