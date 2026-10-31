@@ -4,7 +4,12 @@ An independent website-improvement prototype for a guided project inquiry. It is
 
 ## Current progress
 
-The five-step Vue workflow, dynamic requirement choices, editable review, deterministic brief preview, FastAPI validation, idempotent inquiry endpoint, and PostgreSQL persistence are implemented. The frontend production build and local end-to-end inquiry submission have been verified against Neon. Public deployment and automated backend tests remain.
+The five-step Vue workflow, dynamic requirement choices, editable review, deterministic brief preview, FastAPI validation, idempotent inquiry endpoint, and PostgreSQL persistence are implemented. The frontend production build and local inquiry submission have been verified. The app is deployed publicly on Render and connected to Neon.
+
+## Live demo
+
+- Frontend: <https://cynbit-project-discovery-assistant-hz5m.onrender.com>
+- API health: <https://cynbit-project-discovery-assistant.onrender.com/api/health>
 
 ## Repository layout
 
@@ -36,10 +41,12 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+notepad .env
+# Add DATABASE_URL=<your PostgreSQL/Neon connection string>, then save and close Notepad.
+uvicorn app.main:app --reload --env-file .env
 ```
 
-The API health endpoint is `http://127.0.0.1:8000/api/health`. Set `DATABASE_URL` in the backend process environment to enable inquiry submissions. The Neon connection string is stored in the ignored `backend/.env` file locally.
+The API health endpoint is `http://127.0.0.1:8000/api/health`. The real Neon connection string belongs in the ignored `backend/.env` file locally; never commit it.
 
 ### Frontend
 
@@ -59,7 +66,12 @@ Backend deployment placeholders are listed in `.env.example`; frontend configura
 
 ## Deploy with Render
 
-The root `render.yaml` Blueprint defines a Python API service and a static Vue frontend. To deploy:
+The root `render.yaml` Blueprint defines a Python API service and a static Vue frontend. The current deployment is:
+
+- Frontend: <https://cynbit-project-discovery-assistant-hz5m.onrender.com>
+- API: <https://cynbit-project-discovery-assistant.onrender.com>
+
+To recreate the deployment:
 
 1. Push the repository to GitHub and connect it to Render.
 2. In the Render Dashboard, create a new Blueprint and select this repository's `main` branch.
@@ -70,4 +82,4 @@ The API is configured in the Ohio region to stay near the Neon database's US Eas
 
 ## Verification status
 
-Verified locally: frontend production build, five-step wizard validation/navigation/review logic, API health, and a synthetic inquiry saved through the API to Neon. Automated backend tests and public deployment verification are pending.
+Verified: frontend production build; five-step wizard validation, category changes, back navigation, and review editing; local inquiry submission; public frontend HTTP response; public API health; CORS preflight from the deployed frontend; and idempotent API submission backed by a confirmed PostgreSQL row. Automated backend tests and a full form submission through the public browser remain to be checked.
